@@ -42,7 +42,8 @@ export default function TilesPage() {
       <div className="relative z-10 mx-auto max-w-6xl pt-12">
         <div className="grid grid-cols-2 gap-6 md:grid-cols-3 md:gap-12 lg:grid-cols-4 lg:gap-16">
           {sortedThoughts.map((t, i) => {
-            const number = String(i + 1).padStart(3, "0");
+            const total = sortedThoughts.length;
+            const number = String(total - i).padStart(3, "0");
             return (
               <div
                 key={t.id}

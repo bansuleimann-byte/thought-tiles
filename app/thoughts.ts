@@ -8,7 +8,7 @@ export type Thought = {
   image: string;
 };
 
-export const thoughts: Thought[] = [
+const thoughtsRaw: Thought[] = [
   {
     id: 1,
     title: "first thought",
@@ -93,3 +93,11 @@ Sometimes it's the only thing holding us together.`,
     image: "/tiles/tile4.jpg",
   },
 ];
+const toTime = (d: string) => {
+  const t = Date.parse(d);
+  return Number.isFinite(t) ? t : 0;
+};
+
+export const thoughts: Thought[] = [...thoughtsRaw].sort(
+  (a, b) => toTime(b.date) - toTime(a.date) || b.id - a.id
+);
