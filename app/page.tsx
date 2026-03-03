@@ -1,15 +1,13 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 
-const GRID_COLS = 12;
-const GRID_ROWS = 6;
-const TOTAL_TILES = GRID_COLS * GRID_ROWS;
+const TOTAL_TILES = 72; // matches CSS grid: 4×18 = 8×9 = 12×6
 const REVEAL_INTERVAL_MS = 50;
+const TILE_TRANSITION_MS = 200;
 const HOLD_ON_WALL_MS = 1800;
 const FADE_OUT_MS = 700;
-const PAUSE_BEFORE_NAVIGATE_MS = HOLD_ON_WALL_MS + FADE_OUT_MS;
 
 function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array];
@@ -22,17 +20,16 @@ function shuffleArray<T>(array: T[]): T[] {
 
 export default function Home() {
   const router = useRouter();
-  const [revealedCount, setRevealedCount] = useState(0);
   const [isFading, setIsFading] = useState(false);
-  const tilesPerTick = useRef(1);
+  // null = not yet mounted (SSR), number = ready to animate
+  const [tilesPerTick, setTilesPerTick] = useState<number | null>(null);
 
   const revealOrder = useMemo(
     () => shuffleArray(Array.from({ length: TOTAL_TILES }, (_, i) => i)),
     []
   );
 
-  // O(1) lookup: for each tile index, store what order it gets revealed
-  // replaces the slow O(n) indexOf call that was running 72× per render
+  // O(1) map: tile index → its position in the reveal sequence
   const revealIndexMap = useMemo(() => {
     const map = new Array(TOTAL_TILES);
     revealOrder.forEach((tileIndex, order) => {
@@ -42,26 +39,28 @@ export default function Home() {
   }, [revealOrder]);
 
   useEffect(() => {
-    // reveal more tiles per tick on mobile to keep animation smooth & quick
-    tilesPerTick.current = window.innerWidth < 640 ? 3 : 1;
-  }, []);
+    // Reveal more tiles per tick on mobile → fewer animation groups → smoother
+    const tpt = window.innerWidth < 640 ? 3 : 1;
+    setTilesPerTick(tpt);
 
-  useEffect(() => {
-    if (revealedCount >= TOTAL_TILES) {
-      const holdTimer = setTimeout(() => setIsFading(true), HOLD_ON_WALL_MS);
-      const navTimer = setTimeout(() => router.push("/quote"), PAUSE_BEFORE_NAVIGATE_MS);
-      return () => {
-        clearTimeout(holdTimer);
-        clearTimeout(navTimer);
-      };
-    }
+    // Total time for all tiles to finish animating
+    const totalAnimationMs =
+      Math.ceil(TOTAL_TILES / tpt) * REVEAL_INTERVAL_MS + TILE_TRANSITION_MS;
 
-    const interval = setInterval(() => {
-      setRevealedCount((prev) => Math.min(prev + tilesPerTick.current, TOTAL_TILES));
-    }, REVEAL_INTERVAL_MS);
+    const holdTimer = setTimeout(
+      () => setIsFading(true),
+      totalAnimationMs + HOLD_ON_WALL_MS
+    );
+    const navTimer = setTimeout(
+      () => router.push("/quote"),
+      totalAnimationMs + HOLD_ON_WALL_MS + FADE_OUT_MS
+    );
 
-    return () => clearInterval(interval);
-  }, [revealedCount, router]);
+    return () => {
+      clearTimeout(holdTimer);
+      clearTimeout(navTimer);
+    };
+  }, [router]);
 
   return (
     <main
@@ -78,17 +77,26 @@ export default function Home() {
           backgroundSize: "25%",
         }}
       />
-      {/* grid mask overlay - reveals tiles randomly */}
+      {/* grid mask overlay — pure CSS animations, zero JS during playback */}
       <div className="wall-grid-full absolute inset-0">
         {Array.from({ length: TOTAL_TILES }, (_, i) => {
-          const isRevealed = revealIndexMap[i] < revealedCount; // O(1)
+          if (tilesPerTick === null) {
+            // Pre-mount: tiles are solid (wall hidden). No animation yet.
+            return <div key={i} style={{ backgroundColor: "#fbf7ef" }} />;
+          }
+
+          // Each tile gets a pre-computed CSS animation delay.
+          // Tiles in the same "tick group" animate simultaneously.
+          const tickIndex = Math.floor(revealIndexMap[i] / tilesPerTick);
+          const delayMs = tickIndex * REVEAL_INTERVAL_MS;
+
           return (
             <div
               key={i}
-              className={`transition-opacity duration-200 ease-out ${
-                isRevealed ? "opacity-0" : "opacity-100"
-              }`}
-              style={{ backgroundColor: "#fbf7ef" }}
+              style={{
+                backgroundColor: "#fbf7ef",
+                animation: `tileReveal ${TILE_TRANSITION_MS}ms ease-out ${delayMs}ms forwards`,
+              }}
             />
           );
         })}
