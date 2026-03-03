@@ -70,11 +70,11 @@ export default function TilesPage() {
           <span className="text-sm lowercase opacity-60">loading…</span>
         )}
         {!loading && (
-          <span className="text-2xl lowercase tracking-wide sm:text-3xl">thought tiles</span>
+          <span className="mt-6 block text-xl lowercase tracking-wide sm:mt-0 sm:text-2xl">thought tiles</span>
         )}
       </div>
 
-      <div className="relative z-10 mx-auto w-full max-w-[92rem] pt-16 sm:pt-20">
+      <div className="relative z-10 mx-auto w-full max-w-[92rem] pt-8 sm:pt-20">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 md:gap-4 lg:gap-5">
           {(() => {
             const sortedThoughts = [...thoughts].sort((a, b) => {

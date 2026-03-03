@@ -14,6 +14,7 @@ type BeliefRow = {
 export default function BeliefsPage() {
   const [beliefs, setBeliefs] = useState<BeliefRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeBeliefId, setActiveBeliefId] = useState<number | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -55,57 +56,62 @@ export default function BeliefsPage() {
           const bg = `/beliefs/belief${String(b.bg_index).padStart(2, "0")}.jpg`;
           const body = (b as { content?: string; text?: string }).content ?? (b as { content?: string; text?: string }).text ?? "";
           return (
-            <section
+            <button
               key={b.id}
-              className="group"
-              style={{
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                position: "relative",
-                background: "#fbf7ef",
-                padding: "10px 48px 10px 56px",
-                overflow: "hidden",
-                borderBottom: "1px solid rgba(0,0,0,0.06)",
-              }}
+              type="button"
+              className="block w-full text-left cursor-pointer border-0 bg-transparent p-0"
+              onClick={() => setActiveBeliefId((prev) => (prev === b.id ? null : b.id))}
             >
-              <div
-                className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 absolute inset-0"
-                aria-hidden
-              >
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    backgroundImage: `url(${bg})`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                  }}
-                />
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    background: "rgba(0,0,0,0.2)",
-                  }}
-                />
-              </div>
-              <p
+              <section
+                className="group py-2.5 px-4 sm:py-2.5 sm:pl-14 sm:pr-12"
                 style={{
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
                   position: "relative",
-                  zIndex: 1,
-                  fontSize: "clamp(40px, 5.5vw, 96px)",
-                  lineHeight: 1.05,
-                  letterSpacing: "-0.02em",
-                  maxWidth: "1200px",
-                  margin: 0,
-                  textAlign: "left",
+                  background: "#fbf7ef",
+                  overflow: "hidden",
+                  borderBottom: "1px solid rgba(0,0,0,0.06)",
                 }}
-                className="font-mono font-medium text-black group-hover:text-white transition-colors duration-200"
               >
-                {body}
+                <div
+                  className={`opacity-0 group-hover:opacity-100 transition-opacity duration-200 absolute inset-0 ${activeBeliefId === b.id ? "opacity-100" : ""}`}
+                  aria-hidden
+                >
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      backgroundImage: `url(${bg})`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                    }}
+                  />
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      background: "rgba(0,0,0,0.2)",
+                    }}
+                  />
+                </div>
+                <p
+                  style={{
+                    position: "relative",
+                    zIndex: 1,
+                    fontSize: "clamp(40px, 5.5vw, 96px)",
+                    lineHeight: 1.05,
+                    letterSpacing: "-0.02em",
+                    maxWidth: "1200px",
+                    margin: 0,
+                    textAlign: "left",
+                  }}
+                  className={`font-mono font-medium text-black group-hover:text-white transition-colors duration-200 ${activeBeliefId === b.id ? "text-white" : ""}`}
+                >
+                  {body}
               </p>
             </section>
+            </button>
           );
         })}
       </main>
