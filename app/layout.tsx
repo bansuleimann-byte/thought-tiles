@@ -1,6 +1,6 @@
 import { IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
-import { CustomCursor } from "./components/custom-cursor";
+import { CursorProvider } from "./components/cursor-provider";
 
 const mono = IBM_Plex_Mono({
   subsets: ["latin"],
@@ -21,7 +21,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={mono.className}>
         {children}
-        <CustomCursor />
+        <CursorProvider />
       </body>
     </html>
   );

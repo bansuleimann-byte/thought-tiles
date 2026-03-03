@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { thoughts } from "./thoughts";
+
+type Thought = {
+  id: number;
+  title: string;
+  x: number;
+  y: number;
+};
 
 const PADDING = 12;
 const NUDGE = 16;
@@ -17,7 +23,7 @@ function overlaps(a: DOMRect, b: DOMRect, padding: number): boolean {
   );
 }
 
-export function Garden() {
+export function Garden({ thoughts }: { thoughts: Thought[] }) {
   const refs = useRef<(HTMLDivElement | null)[]>([]);
   const [offsets, setOffsets] = useState<Record<number, { x: number; y: number }>>({});
 
@@ -27,9 +33,7 @@ export function Garden() {
       return;
     }
 
-    const rects = refs.current
-      .filter(Boolean)
-      .map((el) => el!.getBoundingClientRect());
+    const rects = refs.current.filter(Boolean).map((el) => el!.getBoundingClientRect());
     const container = refs.current[0]?.parentElement?.getBoundingClientRect();
     if (!container || rects.length !== thoughts.length) return;
 
@@ -40,6 +44,7 @@ export function Garden() {
     while (changed && iter < 8) {
       changed = false;
       const prev = { ...result };
+
       for (let i = 0; i < thoughts.length; i++) {
         const oi = prev[thoughts[i].id] ?? { x: 0, y: 0 };
         let dx = oi.x;
@@ -47,7 +52,9 @@ export function Garden() {
 
         for (let j = 0; j < thoughts.length; j++) {
           if (i === j) continue;
+
           const oj = prev[thoughts[j].id] ?? { x: 0, y: 0 };
+
           const ri = {
             ...rects[i],
             left: rects[i].left + oi.x,
@@ -55,6 +62,7 @@ export function Garden() {
             top: rects[i].top + oi.y,
             bottom: rects[i].bottom + oi.y,
           };
+
           const rj = {
             ...rects[j],
             left: rects[j].left + oj.x,
@@ -73,25 +81,29 @@ export function Garden() {
           } else {
             dy += ri.top + ri.height / 2 < rj.top + rj.height / 2 ? -NUDGE : NUDGE;
           }
+
           changed = true;
         }
 
         result[thoughts[i].id] = { x: dx, y: dy };
       }
+
       iter++;
     }
 
     const hasOffsets = Object.values(result).some((o) => o.x !== 0 || o.y !== 0);
     setOffsets((prev) => {
       if (!hasOffsets) return {};
+
       const same = thoughts.every(
         (t) =>
           (prev[t.id]?.x ?? 0) === (result[t.id]?.x ?? 0) &&
           (prev[t.id]?.y ?? 0) === (result[t.id]?.y ?? 0)
       );
+
       return same ? prev : result;
     });
-  }, []);
+  }, [thoughts]);
 
   useEffect(() => {
     resolve();

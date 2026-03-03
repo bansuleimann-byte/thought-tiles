@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
@@ -35,6 +34,10 @@ export default function QuotePage() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [typingComplete, router]);
 
+  const handleClick = () => {
+    if (typingComplete) router.push("/tiles");
+  };
+
   useEffect(() => {
     setReducedMotion(typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   }, []);
@@ -53,9 +56,15 @@ export default function QuotePage() {
   }, [typedLength, reducedMotion]);
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-[#fbf7ef] px-8 py-24">
+    <main
+      className="flex min-h-screen flex-col items-center justify-center bg-[#fbf7ef] px-8 py-24 cursor-default"
+      onClick={handleClick}
+      role="button"
+      tabIndex={0}
+      aria-label={typingComplete ? "Tap or press Enter or Space to continue" : undefined}
+    >
       <div className="max-w-xl mx-auto space-y-12 text-center">
-        <p className="text-lg leading-relaxed text-black lowercase" style={{ letterSpacing: "0.08em" }}>
+        <p className="text-2xl sm:text-3xl leading-relaxed text-black lowercase tracking-wide" style={{ letterSpacing: "0.08em" }}>
           {displayedQuote}
           <span
             className="cursor-blink ml-0.5 inline-block w-[2px] flex-shrink-0 bg-black"
@@ -63,14 +72,6 @@ export default function QuotePage() {
             aria-hidden
           />
         </p>
-        {typingComplete && (
-          <Link
-            href="/tiles"
-            className="inline-block text-sm lowercase text-black opacity-70 transition-opacity duration-200 hover:opacity-100"
-          >
-            enter →
-          </Link>
-        )}
       </div>
     </main>
   );

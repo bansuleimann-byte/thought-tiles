@@ -33,11 +33,14 @@ html, body {
   color: black;
 }
 
-/* Custom cursor - desktop only */
+/* Custom cursor - desktop only; disabled on /admin */
 @media (pointer: fine) {
-  html, body { cursor: none !important; }
-  *, *::before, *::after { cursor: none !important; }
-  a, button, input, textarea, select, label { cursor: none !important; }
+  html.native-cursor-hidden,
+  html.native-cursor-hidden *,
+  html.native-cursor-hidden *::before,
+  html.native-cursor-hidden *::after { cursor: none !important; }
+  body[data-route="admin"],
+  body[data-route="admin"] * { cursor: auto !important; }
   .custom-cursor {
     position: fixed;
     top: 0;

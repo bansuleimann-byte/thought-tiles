@@ -40,7 +40,7 @@ export function CustomCursor() {
     };
 
     const tick = () => {
-      const ease = 0.15;
+      const ease = 0.45;
       currentX += (targetX - currentX) * ease;
       currentY += (targetY - currentY) * ease;
       setPos({ x: currentX, y: currentY });
