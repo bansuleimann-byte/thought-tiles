@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 
 function safeFileName(name: string) {
@@ -27,6 +28,7 @@ type BeliefRow = {
 };
 
 export default function AdminPage() {
+  const router = useRouter();
   const supabase = useMemo(() => {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -90,6 +92,7 @@ export default function AdminPage() {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    router.refresh();
   };
 
   const handleLogin = useCallback(
@@ -108,8 +111,9 @@ export default function AdminPage() {
       }
       setLoginEmail("");
       setLoginPassword("");
+      router.refresh();
     },
-    [supabase, loginEmail, loginPassword]
+    [supabase, loginEmail, loginPassword, router]
   );
 
   const fetchThoughts = useCallback(async () => {
@@ -506,9 +510,6 @@ export default function AdminPage() {
                 className="w-full rounded-xl border border-black/15 bg-white/60 px-3 py-2 font-mono text-sm outline-none focus:border-black/30"
               />
             </div>
-            {loginError && (
-              <p className="font-mono text-sm text-red-600">{loginError}</p>
-            )}
             <button
               type="submit"
               disabled={loginLoading}
@@ -516,6 +517,9 @@ export default function AdminPage() {
             >
               {loginLoading ? "Logging in…" : "Log in"}
             </button>
+            {loginError && (
+              <p className="font-mono text-sm text-red-600 mt-2">{loginError}</p>
+            )}
           </form>
         </div>
       </div>
