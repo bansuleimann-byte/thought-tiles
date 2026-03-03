@@ -63,6 +63,11 @@ export default function AdminPage() {
   const [editBeliefBgChoice, setEditBeliefBgChoice] = useState<number | null>(null); // null = don't change
   const [beliefTableMissing, setBeliefTableMissing] = useState(false);
 
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [loginLoading, setLoginLoading] = useState(false);
+
   const ADMIN_EMAIL = "bansuleimann@gmail.com";
 
   useEffect(() => {
@@ -86,6 +91,26 @@ export default function AdminPage() {
   const signOut = async () => {
     await supabase.auth.signOut();
   };
+
+  const handleLogin = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setLoginError(null);
+      setLoginLoading(true);
+      const { error } = await supabase.auth.signInWithPassword({
+        email: loginEmail.trim(),
+        password: loginPassword,
+      });
+      setLoginLoading(false);
+      if (error) {
+        setLoginError(error.message);
+        return;
+      }
+      setLoginEmail("");
+      setLoginPassword("");
+    },
+    [supabase, loginEmail, loginPassword]
+  );
 
   const fetchThoughts = useCallback(async () => {
     setListLoading(true);
@@ -455,10 +480,43 @@ export default function AdminPage() {
   if (!sessionEmail) {
     return (
       <div className="cursor-auto min-h-screen bg-[#fbf7ef] flex items-center justify-center p-8">
-        <div className="rounded-2xl border border-black/10 bg-white/50 backdrop-blur px-6 py-6 max-w-xl mx-auto text-center">
+        <div className="rounded-2xl border border-black/10 bg-white/50 backdrop-blur px-6 py-6 max-w-xl mx-auto w-full">
           <h1 className="font-mono text-lg lowercase">Admin</h1>
-          <p className="font-mono text-sm opacity-70 mt-2">You are not logged in.</p>
-          <p className="font-mono text-sm opacity-70 mt-1">Refresh and log in again.</p>
+          <p className="font-mono text-sm opacity-70 mt-2">Log in to continue.</p>
+          <form onSubmit={handleLogin} className="mt-6 space-y-4 text-left">
+            <div>
+              <label className="block text-xs font-mono opacity-70 lowercase mb-1">Email</label>
+              <input
+                type="email"
+                value={loginEmail}
+                onChange={(e) => setLoginEmail(e.target.value)}
+                required
+                autoComplete="email"
+                className="w-full rounded-xl border border-black/15 bg-white/60 px-3 py-2 font-mono text-sm outline-none focus:border-black/30"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-mono opacity-70 lowercase mb-1">Password</label>
+              <input
+                type="password"
+                value={loginPassword}
+                onChange={(e) => setLoginPassword(e.target.value)}
+                required
+                autoComplete="current-password"
+                className="w-full rounded-xl border border-black/15 bg-white/60 px-3 py-2 font-mono text-sm outline-none focus:border-black/30"
+              />
+            </div>
+            {loginError && (
+              <p className="font-mono text-sm text-red-600">{loginError}</p>
+            )}
+            <button
+              type="submit"
+              disabled={loginLoading}
+              className="rounded-xl border border-black/20 bg-black text-[#fbf7ef] px-4 py-2 font-mono text-sm hover:bg-black/90 disabled:opacity-50"
+            >
+              {loginLoading ? "Logging in…" : "Log in"}
+            </button>
+          </form>
         </div>
       </div>
     );
