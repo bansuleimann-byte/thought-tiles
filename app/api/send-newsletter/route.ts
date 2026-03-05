@@ -41,11 +41,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ count: 0, message: "No subscribers yet." });
     }
 
-    // Determine site URL
+    // Determine site URL — prefer explicit env var, then Vercel production URL, then deployment URL
     const origin =
-      process.env.VERCEL_URL
+      process.env.NEXT_PUBLIC_SITE_URL ??
+      (process.env.VERCEL_PROJECT_PRODUCTION_URL
+        ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+        : process.env.VERCEL_URL
         ? `https://${process.env.VERCEL_URL}`
-        : "http://localhost:3000";
+        : "http://localhost:3000");
     const thoughtUrl = `${origin}/thought/${thoughtId}`;
     const snippet = content
       ? content.slice(0, 220) + (content.length > 220 ? "…" : "")
