@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
       const { error: sendError } = await resend.batch.send(batch);
       if (sendError) {
         console.error("resend batch error:", sendError);
-        return NextResponse.json({ error: "Failed to send emails." }, { status: 500 });
+        return NextResponse.json({ error: (sendError as { message?: string }).message ?? JSON.stringify(sendError) }, { status: 500 });
       }
       sentCount += batch.length;
     }
@@ -77,7 +77,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ count: sentCount });
   } catch (e) {
     console.error("send-newsletter route error:", e);
-    return NextResponse.json({ error: "Something went wrong." }, { status: 500 });
+    const msg = e instanceof Error ? e.message : JSON.stringify(e);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
 
