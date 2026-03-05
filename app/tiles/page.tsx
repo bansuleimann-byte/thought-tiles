@@ -26,6 +26,7 @@ export default function TilesPage() {
   const [mounted, setMounted] = useState(false);
 
   const [subEmail, setSubEmail] = useState("");
+  const [subOpen, setSubOpen] = useState(false);
   const [subStatus, setSubStatus] = useState<"idle" | "loading" | "success" | "already" | "error">("idle");
 
   const handleSubscribe = useCallback(async (e: React.FormEvent) => {
@@ -42,6 +43,7 @@ export default function TilesPage() {
         setSubEmail("");
       } else if (res.status === 409) {
         setSubStatus("already");
+        setSubOpen(false);
       } else {
         setSubStatus("error");
       }
@@ -72,6 +74,52 @@ export default function TilesPage() {
   return (
     <main className="fade-in relative min-h-screen select-none bg-[#fbf7ef] px-6 py-10 text-black sm:px-10 sm:py-12">
       <SiteNav />
+
+      {/* Subscribe widget — mirrors SiteNav position, top-left */}
+      <div className="fixed top-0 left-0 z-20 flex items-center px-4 py-3 sm:left-8 sm:top-8 sm:px-0 sm:py-0 pointer-events-none">
+        <div className="pointer-events-auto font-mono text-xs lowercase tracking-wide text-black/60 sm:text-sm">
+          {subStatus === "success" ? (
+            <span>subscribed ✦</span>
+          ) : subStatus === "already" ? (
+            <span>already subscribed</span>
+          ) : subOpen ? (
+            <form onSubmit={handleSubscribe} className="flex items-center gap-2">
+              <input
+                type="email"
+                value={subEmail}
+                onChange={(e) => setSubEmail(e.target.value)}
+                placeholder="your@email.com"
+                autoFocus
+                required
+                className="w-28 sm:w-36 bg-transparent border-b border-black/30 outline-none font-mono text-xs lowercase tracking-wide placeholder:opacity-30 pb-px"
+              />
+              <button
+                type="submit"
+                disabled={subStatus === "loading"}
+                className="transition-colors hover:text-black disabled:opacity-40"
+              >
+                {subStatus === "loading" ? "…" : "→"}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setSubOpen(false); setSubStatus("idle"); setSubEmail(""); }}
+                className="transition-colors hover:text-black opacity-40"
+              >
+                ✕
+              </button>
+            </form>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setSubOpen(true)}
+              className="transition-colors hover:text-black text-left"
+            >
+              subscribe
+              <span className="block text-[10px] opacity-40 mt-0.5 normal-case tracking-normal">new thoughts, straight to your inbox</span>
+            </button>
+          )}
+        </div>
+      </div>
       <div
         className="pointer-events-none fixed inset-0 z-0 opacity-35"
         style={{
@@ -158,38 +206,6 @@ export default function TilesPage() {
         </div>
       </div>
 
-      {/* Subscribe section */}
-      <div className="relative z-10 mx-auto w-full max-w-[92rem] pt-16 pb-8">
-        <div className="border-t border-black/10 pt-10">
-          <p className="font-mono text-xs uppercase tracking-widest opacity-40 mb-4">subscribe</p>
-          <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-2 max-w-sm">
-            <input
-              type="email"
-              value={subEmail}
-              onChange={(e) => setSubEmail(e.target.value)}
-              placeholder="your@email.com"
-              required
-              className="flex-1 rounded-xl border border-black/15 bg-white/60 px-3 py-2 font-mono text-sm outline-none focus:border-black/30 placeholder:opacity-30"
-            />
-            <button
-              type="submit"
-              disabled={subStatus === "loading"}
-              className="rounded-xl border border-black/20 bg-black text-[#fbf7ef] px-4 py-2 font-mono text-xs uppercase tracking-wider hover:bg-black/90 disabled:opacity-50"
-            >
-              {subStatus === "loading" ? "…" : "subscribe"}
-            </button>
-          </form>
-          {subStatus === "success" && (
-            <p className="mt-2 font-mono text-xs opacity-50">you&apos;re in ✦</p>
-          )}
-          {subStatus === "already" && (
-            <p className="mt-2 font-mono text-xs opacity-50">already subscribed.</p>
-          )}
-          {subStatus === "error" && (
-            <p className="mt-2 font-mono text-xs text-red-500">something went wrong. try again.</p>
-          )}
-        </div>
-      </div>
     </main>
   );
 }
