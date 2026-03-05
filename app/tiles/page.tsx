@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { supabase } from "../supabaseClient";
@@ -24,6 +24,31 @@ export default function TilesPage() {
   const [thoughts, setThoughts] = useState<ThoughtRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
+
+  const [subEmail, setSubEmail] = useState("");
+  const [subStatus, setSubStatus] = useState<"idle" | "loading" | "success" | "already" | "error">("idle");
+
+  const handleSubscribe = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubStatus("loading");
+    try {
+      const res = await fetch("/api/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: subEmail }),
+      });
+      if (res.ok) {
+        setSubStatus("success");
+        setSubEmail("");
+      } else if (res.status === 409) {
+        setSubStatus("already");
+      } else {
+        setSubStatus("error");
+      }
+    } catch {
+      setSubStatus("error");
+    }
+  }, [subEmail]);
 
   useEffect(() => {
     setMounted(true);
@@ -130,6 +155,39 @@ export default function TilesPage() {
               );
             });
           })()}
+        </div>
+      </div>
+
+      {/* Subscribe section */}
+      <div className="relative z-10 mx-auto w-full max-w-[92rem] pt-16 pb-8">
+        <div className="border-t border-black/10 pt-10">
+          <p className="font-mono text-xs uppercase tracking-widest opacity-40 mb-4">subscribe</p>
+          <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-2 max-w-sm">
+            <input
+              type="email"
+              value={subEmail}
+              onChange={(e) => setSubEmail(e.target.value)}
+              placeholder="your@email.com"
+              required
+              className="flex-1 rounded-xl border border-black/15 bg-white/60 px-3 py-2 font-mono text-sm outline-none focus:border-black/30 placeholder:opacity-30"
+            />
+            <button
+              type="submit"
+              disabled={subStatus === "loading"}
+              className="rounded-xl border border-black/20 bg-black text-[#fbf7ef] px-4 py-2 font-mono text-xs uppercase tracking-wider hover:bg-black/90 disabled:opacity-50"
+            >
+              {subStatus === "loading" ? "…" : "subscribe"}
+            </button>
+          </form>
+          {subStatus === "success" && (
+            <p className="mt-2 font-mono text-xs opacity-50">you&apos;re in ✦</p>
+          )}
+          {subStatus === "already" && (
+            <p className="mt-2 font-mono text-xs opacity-50">already subscribed.</p>
+          )}
+          {subStatus === "error" && (
+            <p className="mt-2 font-mono text-xs text-red-500">something went wrong. try again.</p>
+          )}
         </div>
       </div>
     </main>

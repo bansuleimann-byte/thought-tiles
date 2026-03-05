@@ -54,6 +54,12 @@ export default function AdminPage() {
   const [editContent, setEditContent] = useState("");
 
   // Beliefs section state (background from /public/beliefs; auto or admin-chosen)
+  // Newsletter state
+  const [subscriberCount, setSubscriberCount] = useState<number | null>(null);
+  const [newsletterThoughtId, setNewsletterThoughtId] = useState<number | null>(null);
+  const [sendingNewsletter, setSendingNewsletter] = useState(false);
+  const [newsletterMessage, setNewsletterMessage] = useState<string | null>(null);
+
   const [beliefText, setBeliefText] = useState("");
   const [beliefBgChoice, setBeliefBgChoice] = useState<number | null>(null); // null = auto
   const [beliefs, setBeliefs] = useState<BeliefRow[]>([]);
@@ -132,6 +138,50 @@ export default function AdminPage() {
     setListLoading(false);
   }, []);
 
+  const fetchSubscriberCount = useCallback(async () => {
+    const { count } = await supabase
+      .from("subscribers")
+      .select("*", { count: "exact", head: true });
+    setSubscriberCount(count ?? 0);
+  }, [supabase]);
+
+  const sendNewsletter = useCallback(async () => {
+    const thought =
+      (newsletterThoughtId != null
+        ? thoughts.find((t) => t.id === newsletterThoughtId)
+        : null) ?? thoughts[0];
+    if (!thought) {
+      alert("No thought selected.");
+      return;
+    }
+    setSendingNewsletter(true);
+    setNewsletterMessage(null);
+    const { data: { session } } = await supabase.auth.getSession();
+    const accessToken = session?.access_token;
+    const res = await fetch("/api/send-newsletter", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        thoughtId: thought.id,
+        title: thought.title ?? "",
+        content: thought.content ?? "",
+        date: thought.date ?? "",
+        accessToken,
+      }),
+    });
+    const json = await res.json();
+    setSendingNewsletter(false);
+    if (res.ok) {
+      setNewsletterMessage(
+        json.count === 0
+          ? "no subscribers yet."
+          : `sent to ${json.count} subscriber${json.count !== 1 ? "s" : ""} ✦`
+      );
+    } else {
+      setNewsletterMessage(json.error ?? "something went wrong.");
+    }
+  }, [thoughts, newsletterThoughtId, supabase]);
+
   const fetchBeliefs = useCallback(async () => {
     setBeliefsListLoading(true);
     setBeliefTableMissing(false);
@@ -179,8 +229,9 @@ export default function AdminPage() {
     if (sessionEmail === ADMIN_EMAIL) {
       fetchThoughts();
       fetchBeliefs();
+      fetchSubscriberCount();
     }
-  }, [sessionEmail, fetchThoughts, fetchBeliefs]);
+  }, [sessionEmail, fetchThoughts, fetchBeliefs, fetchSubscriberCount]);
 
   const startEdit = useCallback((t: ThoughtRow) => {
     setEditingId(t.id);
@@ -725,6 +776,52 @@ export default function AdminPage() {
                 })}
               </ul>
             )}
+          </div>
+        </div>
+
+        {/* Newsletter section */}
+        <div className="mt-10 rounded-2xl border border-black/10 bg-white/50 backdrop-blur px-6 py-6">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="font-mono text-lg lowercase">Newsletter</h2>
+            <span className="font-mono text-xs opacity-50">
+              {subscriberCount !== null
+                ? `${subscriberCount} subscriber${subscriberCount !== 1 ? "s" : ""}`
+                : ""}
+            </span>
+          </div>
+          <div className="mt-4 space-y-4">
+            <div>
+              <label className="block text-xs font-mono opacity-70 lowercase mb-1">Thought to send</label>
+              <select
+                value={newsletterThoughtId ?? ""}
+                onChange={(e) =>
+                  setNewsletterThoughtId(
+                    e.target.value === "" ? null : parseInt(e.target.value, 10)
+                  )
+                }
+                className="w-full rounded-xl border border-black/15 bg-white/60 px-3 py-2 font-mono text-sm outline-none focus:border-black/30"
+              >
+                <option value="">Most recent</option>
+                {thoughts.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    #{t.id} — {t.title ?? "(untitled)"} ({t.date ?? "no date"})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-wrap gap-3 items-center">
+              <button
+                type="button"
+                onClick={sendNewsletter}
+                disabled={sendingNewsletter || thoughts.length === 0}
+                className="rounded-xl border border-black/20 bg-black text-[#fbf7ef] px-4 py-2 font-mono text-sm hover:bg-black/90 disabled:opacity-50"
+              >
+                {sendingNewsletter ? "Sending…" : "Send newsletter"}
+              </button>
+              {newsletterMessage && (
+                <span className="font-mono text-xs opacity-70 lowercase">{newsletterMessage}</span>
+              )}
+            </div>
           </div>
         </div>
 
