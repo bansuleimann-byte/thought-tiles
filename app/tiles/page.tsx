@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { supabase } from "../supabaseClient";
@@ -28,6 +28,19 @@ export default function TilesPage() {
   const [subEmail, setSubEmail] = useState("");
   const [subOpen, setSubOpen] = useState(false);
   const [subStatus, setSubStatus] = useState<"idle" | "loading" | "success" | "already" | "error">("idle");
+  const [titleVisible, setTitleVisible] = useState(true);
+  const titleRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = titleRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setTitleVisible(entry.isIntersecting),
+      { threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const handleSubscribe = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,7 +89,7 @@ export default function TilesPage() {
       <SiteNav />
 
       {/* Subscribe bar — mobile only, fixed bottom */}
-      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-20 bg-[#fbf7ef]/90 backdrop-blur-sm border-t border-black/10 px-5 py-3 font-mono text-xs lowercase tracking-wide text-black/60">
+      <div className={`sm:hidden fixed bottom-0 left-0 right-0 z-20 bg-[#fbf7ef]/90 backdrop-blur-sm px-5 py-3 font-mono text-xs lowercase tracking-wide text-black/60 transition-transform duration-300 ease-in-out ${titleVisible ? "translate-y-0" : "translate-y-full"}`}>
         {subStatus === "success" ? (
           <span>subscribed ✦</span>
         ) : subStatus === "already" ? (
@@ -102,7 +115,7 @@ export default function TilesPage() {
         ) : (
           <button type="button" onClick={() => setSubOpen(true)} className="transition-colors hover:text-black text-left">
             subscribe
-            <span className="block text-[10px] opacity-40 mt-0.5 normal-case tracking-normal">new thoughts, straight to your inbox</span>
+            <span className="block text-[10px] opacity-60 mt-0.5 normal-case tracking-normal">new thoughts, straight to your inbox</span>
           </button>
         )}
       </div>
@@ -147,7 +160,7 @@ export default function TilesPage() {
               className="transition-colors hover:text-black text-left"
             >
               subscribe
-              <span className="block text-[10px] opacity-40 mt-0.5 normal-case tracking-normal">new thoughts, straight to your inbox</span>
+              <span className="block text-[10px] opacity-60 mt-0.5 normal-case tracking-normal">new thoughts, straight to your inbox</span>
             </button>
           )}
         </div>
@@ -170,7 +183,7 @@ export default function TilesPage() {
         }}
         aria-hidden
       />
-      <div className="relative z-10 text-center">
+      <div ref={titleRef} className="relative z-10 text-center">
         {loading && (
           <span className="text-sm lowercase opacity-60">loading…</span>
         )}
