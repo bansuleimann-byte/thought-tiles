@@ -75,8 +75,8 @@ export default function TilesPage() {
     <main className="fade-in relative min-h-screen select-none bg-[#fbf7ef] px-6 py-10 text-black sm:px-10 sm:py-12">
       <SiteNav />
 
-      {/* Subscribe widget — mirrors SiteNav position, top-left */}
-      <div className="fixed top-0 left-0 z-20 flex items-center px-4 py-3 sm:left-8 sm:top-8 sm:px-0 sm:py-0 pointer-events-none">
+      {/* Subscribe widget — desktop only, mirrors SiteNav top-left */}
+      <div className="hidden sm:flex fixed top-0 left-0 z-20 items-center sm:left-8 sm:top-8 sm:px-0 sm:py-0 pointer-events-none">
         <div className="pointer-events-auto font-mono text-xs lowercase tracking-wide text-black/60 sm:text-sm">
           {subStatus === "success" ? (
             <span>subscribed ✦</span>
@@ -145,6 +145,37 @@ export default function TilesPage() {
         {!loading && (
           <span className="mt-6 block text-xl lowercase tracking-wide sm:mt-0 sm:text-2xl">thought tiles</span>
         )}
+        {/* Subscribe — mobile only, sits below title */}
+        <div className="sm:hidden mt-3 font-mono text-xs lowercase tracking-wide text-black/60">
+          {subStatus === "success" ? (
+            <span>subscribed ✦</span>
+          ) : subStatus === "already" ? (
+            <span>already subscribed</span>
+          ) : subOpen ? (
+            <form onSubmit={handleSubscribe} className="flex items-center justify-center gap-2">
+              <input
+                type="email"
+                value={subEmail}
+                onChange={(e) => setSubEmail(e.target.value)}
+                placeholder="your@email.com"
+                autoFocus
+                required
+                className="w-36 bg-transparent border-b border-black/30 outline-none font-mono text-xs lowercase tracking-wide placeholder:opacity-30 pb-px"
+              />
+              <button type="submit" disabled={subStatus === "loading"} className="transition-colors hover:text-black disabled:opacity-40">
+                {subStatus === "loading" ? "…" : "→"}
+              </button>
+              <button type="button" onClick={() => { setSubOpen(false); setSubStatus("idle"); setSubEmail(""); }} className="opacity-40 hover:text-black transition-colors">
+                ✕
+              </button>
+            </form>
+          ) : (
+            <button type="button" onClick={() => setSubOpen(true)} className="transition-colors hover:text-black">
+              subscribe
+              <span className="block text-[10px] opacity-40 mt-0.5 normal-case tracking-normal">new thoughts, straight to your inbox</span>
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="relative z-10 mx-auto w-full max-w-[92rem] pt-8 sm:pt-20">
