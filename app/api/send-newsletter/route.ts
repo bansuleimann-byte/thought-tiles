@@ -67,6 +67,11 @@ export async function POST(req: NextRequest) {
         to: [to],
         subject: `new thought — ${title}`,
         html: buildEmail({ title, date, snippet, thoughtUrl }),
+        text: buildPlainText({ title, date, snippet, thoughtUrl }),
+        headers: {
+          "List-Unsubscribe": `<mailto:updates@mythoughttiles.com?subject=unsubscribe>`,
+          "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+        },
       }));
 
       const { error: sendError } = await resend.batch.send(batch);
@@ -83,6 +88,34 @@ export async function POST(req: NextRequest) {
     const msg = e instanceof Error ? e.message : JSON.stringify(e);
     return NextResponse.json({ error: msg }, { status: 500 });
   }
+}
+
+function buildPlainText({
+  title,
+  date,
+  snippet,
+  thoughtUrl,
+}: {
+  title: string;
+  date: string;
+  snippet: string;
+  thoughtUrl: string;
+}) {
+  return [
+    "thought tiles",
+    "",
+    date ? date : "",
+    title,
+    "",
+    snippet ? snippet : "",
+    "",
+    `read thought → ${thoughtUrl}`,
+    "",
+    "─",
+    "to unsubscribe, reply with \"unsubscribe\"",
+  ]
+    .filter((line, i, arr) => !(line === "" && arr[i - 1] === ""))
+    .join("\n");
 }
 
 function buildEmail({
