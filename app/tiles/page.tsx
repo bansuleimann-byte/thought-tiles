@@ -91,7 +91,7 @@ export default function TilesPage() {
       {/* Subscribe bar — mobile only, fixed bottom */}
       <div className={`sm:hidden fixed bottom-0 left-0 right-0 z-20 bg-[#fbf7ef]/90 backdrop-blur-sm px-5 py-3 font-mono text-xs lowercase tracking-wide text-black/60 transition-transform duration-300 ease-in-out ${titleVisible ? "translate-y-0" : "translate-y-full"}`}>
         {subStatus === "success" ? (
-          <span>subscribed ✦</span>
+          <span>subscribed</span>
         ) : subStatus === "already" ? (
           <span>already subscribed</span>
         ) : subOpen ? (
@@ -124,7 +124,7 @@ export default function TilesPage() {
       <div className="hidden sm:flex fixed top-0 left-0 z-20 items-center sm:left-8 sm:top-8 sm:px-0 sm:py-0 pointer-events-none">
         <div className="pointer-events-auto font-mono text-xs lowercase tracking-wide text-black/60 sm:text-sm">
           {subStatus === "success" ? (
-            <span>subscribed ✦</span>
+            <span>subscribed</span>
           ) : subStatus === "already" ? (
             <span>already subscribed</span>
           ) : subOpen ? (

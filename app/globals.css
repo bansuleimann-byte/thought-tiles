@@ -168,3 +168,12 @@ html, body {
     animation: cursorBlink 1s step-end infinite;
   }
 }
+
+/* Quote page character-by-character reveal via CSS (improves LCP) */
+@keyframes charReveal {
+  to { opacity: 1; }
+}
+.char-reveal {
+  opacity: 0;
+  animation: charReveal 1ms linear forwards;
+}
