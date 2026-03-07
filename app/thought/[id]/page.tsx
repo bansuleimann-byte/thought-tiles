@@ -11,6 +11,7 @@ type ThoughtRow = {
   title: string | null;
   content: string | null;
   date: string | null;
+  tile_number: number | null;
 };
 
 type ThoughtImageRow = {
@@ -49,7 +50,7 @@ export default function ThoughtPage({
     (async () => {
       const { data: row, error } = await supabase
         .from("thoughts")
-        .select("id, title, content, date")
+        .select("id, title, content, date, tile_number")
         .eq("id", numId)
         .single();
 
@@ -133,7 +134,7 @@ export default function ThoughtPage({
             style={{ transitionDuration: "var(--dur)", transitionTimingFunction: "var(--ease-out)" }}
           >
             <Image
-              src={`/tiles/tile${thought.id}.jpg`}
+              src={`/tiles/tile${thought.tile_number ?? thought.id}.jpg`}
               alt={title}
               width={96}
               height={96}
