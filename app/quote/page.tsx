@@ -29,7 +29,6 @@ export default function QuotePage() {
   const isComplete = typedLength >= FULL_TEXT.length;
 
   useEffect(() => {
-    if (!isComplete) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
@@ -38,7 +37,7 @@ export default function QuotePage() {
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isComplete, router]);
+  }, [router]);
 
   useEffect(() => {
     if (typedLength >= FULL_TEXT.length) return;
@@ -60,10 +59,10 @@ export default function QuotePage() {
   return (
     <main
       className="flex min-h-screen flex-col items-center justify-center bg-[#fbf7ef] px-8 py-24 cursor-default"
-      onClick={() => isComplete && router.push("/tiles")}
+      onClick={() => router.push("/tiles")}
       role="button"
       tabIndex={0}
-      aria-label={isComplete ? "Tap or press Enter or Space to continue" : undefined}
+      aria-label="Tap or press Enter or Space to continue"
     >
       <div className="flex flex-col items-center gap-10 sm:gap-2 text-center max-w-[92vw] sm:max-w-none px-4 sm:px-0 break-anywhere">
         <p

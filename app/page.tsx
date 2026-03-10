@@ -62,12 +62,17 @@ export default function Home() {
     };
   }, [router]);
 
+  function handleClick() {
+    router.push("/quote");
+  }
+
   return (
     <main
-      className={`fixed inset-0 select-none bg-[#fbf7ef] outline-none focus:outline-none transition-opacity ease-out ${
+      className={`fixed inset-0 select-none bg-[#fbf7ef] outline-none focus:outline-none transition-opacity ease-out cursor-pointer ${
         isFading ? "opacity-0" : "opacity-100"
       }`}
       style={{ transitionDuration: isFading ? `${FADE_OUT_MS}ms` : undefined }}
+      onClick={handleClick}
     >
       {/* wallpaper background */}
       <div
