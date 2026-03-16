@@ -205,10 +205,22 @@ export default function TilesPage() {
               return (b.id ?? 0) - (a.id ?? 0);
             });
             const total = sortedThoughts.length;
+            const usedTileNums = new Set<number>();
+            const tileNums = sortedThoughts.map((t) => {
+              const preferred = t.tile_number ?? t.id;
+              if (preferred !== 6) {
+                usedTileNums.add(preferred);
+                return preferred;
+              }
+              let substitute = 1;
+              while (usedTileNums.has(substitute) || substitute === 6) substitute++;
+              usedTileNums.add(substitute);
+              return substitute;
+            });
             return sortedThoughts.map((t, i) => {
               const number = String(total - i).padStart(3, "0");
               const title = t.title ?? "";
-              const tileNum = (t.tile_number ?? t.id) === 6 ? 1 : (t.tile_number ?? t.id);
+              const tileNum = tileNums[i];
               return (
                 <div
                   key={t.id}
