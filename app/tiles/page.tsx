@@ -228,7 +228,7 @@ export default function TilesPage() {
                     >
                       <div className="relative aspect-square w-full overflow-hidden bg-black/5">
                         <Image
-                          src={`/tiles/tile${t.tile_number ?? t.id}.jpg`}
+                          src={i === 0 ? "/tiles/tile4.jpg" : `/tiles/tile${t.tile_number ?? t.id}.jpg`}
                           alt={t.title ?? ""}
                           fill
                           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
