@@ -134,7 +134,7 @@ export default function ThoughtPage({
             style={{ transitionDuration: "var(--dur)", transitionTimingFunction: "var(--ease-out)" }}
           >
             <Image
-              src={`/tiles/tile${(thought.tile_number ?? thought.id) === 6 ? 1 : (thought.tile_number ?? thought.id)}.jpg`}
+              src={`/tiles/tile${thought.tile_number ?? thought.id}.jpg`}
               alt={title}
               width={96}
               height={96}

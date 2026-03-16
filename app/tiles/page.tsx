@@ -205,22 +205,9 @@ export default function TilesPage() {
               return (b.id ?? 0) - (a.id ?? 0);
             });
             const total = sortedThoughts.length;
-            const usedTileNums = new Set<number>();
-            const tileNums = sortedThoughts.map((t) => {
-              const preferred = t.tile_number ?? t.id;
-              if (preferred !== 6) {
-                usedTileNums.add(preferred);
-                return preferred;
-              }
-              let substitute = 1;
-              while (usedTileNums.has(substitute) || substitute === 6) substitute++;
-              usedTileNums.add(substitute);
-              return substitute;
-            });
             return sortedThoughts.map((t, i) => {
               const number = String(total - i).padStart(3, "0");
               const title = t.title ?? "";
-              const tileNum = tileNums[i];
               return (
                 <div
                   key={t.id}
@@ -241,7 +228,7 @@ export default function TilesPage() {
                     >
                       <div className="relative aspect-square w-full overflow-hidden bg-black/5">
                         <Image
-                          src={`/tiles/tile${tileNum}.jpg`}
+                          src={`/tiles/tile${t.tile_number ?? t.id}.jpg`}
                           alt={t.title ?? ""}
                           fill
                           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
