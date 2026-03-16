@@ -208,6 +208,7 @@ export default function TilesPage() {
             return sortedThoughts.map((t, i) => {
               const number = String(total - i).padStart(3, "0");
               const title = t.title ?? "";
+              const tileNum = (t.tile_number ?? t.id) === 6 ? 1 : (t.tile_number ?? t.id);
               return (
                 <div
                   key={t.id}
@@ -228,7 +229,7 @@ export default function TilesPage() {
                     >
                       <div className="relative aspect-square w-full overflow-hidden bg-black/5">
                         <Image
-                          src={i === 0 ? "/tiles/tile4.jpg" : `/tiles/tile${t.tile_number ?? t.id}.jpg`}
+                          src={`/tiles/tile${tileNum}.jpg`}
                           alt={t.title ?? ""}
                           fill
                           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
