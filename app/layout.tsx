@@ -9,6 +9,7 @@ const mono = IBM_Plex_Mono({
 
 export const metadata = {
   title: "thought tiles",
+  description: "thoughts are like tiles. each one fits somewhere. together, they make a wall.",
 };
 
 export default function RootLayout({
